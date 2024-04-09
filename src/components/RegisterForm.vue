@@ -29,6 +29,9 @@
       <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-300">Cadastrar</button>
     </form>
   </div>
+  <div v-if="errorMessage" class="mx-auto bg-red-200 p-4 rounded-md mt-4 shadow-md md:w-80">
+    <span class="text-red-800 font-semibold">{{ errorMessage }}</span>
+  </div>
 </template>
 
 <script lang="ts">
@@ -44,6 +47,7 @@ export default class UserForm extends Vue {
   dateOfBirth = '';
   genre = '';
   cpf = '';
+  errorMessage = '';
 
   async submitForm() {
     const newUserData: CreateUserInput = {
@@ -64,6 +68,14 @@ export default class UserForm extends Vue {
       router.push('/');
 
     } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage = error.response.data.message
+        if (errorMessage === 'Data conflict!') {
+          this.errorMessage = 'CPF ou Email já estão cadastrados'
+        } else if (errorMessage === 'Invalid CPF!') {
+          this.errorMessage = 'CPF inválido'
+        }
+      }
       console.error('Error adding user:', error);
     }
   }
